@@ -18,6 +18,7 @@ optionsSection.Bind(_configurationOptions);
 _configurationOptions.Environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
 builder.Services.AddSingleton(_configurationOptions);
+builder.Services.AddHttpContextAccessor();
 
 // Db set up
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
