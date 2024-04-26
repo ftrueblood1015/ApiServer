@@ -36,5 +36,36 @@ namespace Service.Tests.Application
             result.Password.ShouldBe(_passwordHashService.CreateHash(password));
             _passwordHashService.VerifyPassword(password, result.Password!).ShouldBeTrue();
         }
+
+        [Test]
+        public void GetByEmail_Should_Return_User()
+        {
+            // Arrange
+            var email = "New@gmail.com";
+            var password = "Password";
+            var user = new User { Id = Guid.NewGuid(), Email = email, Password = password, PhoneNumber = "55912345678"};
+            var add = _userService.Add(user);
+
+            // Act
+            var result = _userService.GetByEmail(email);
+
+            // Assert
+            result.ShouldNotBeNull();
+            result.Email.ShouldNotBeNull();
+            result.Email.ShouldBe(email);
+        }
+
+        [Test]
+        public void GetByEmail_Should_Not_Return_User()
+        {
+            // Arrange
+            var email = "Old@gmail.com";
+
+            // Act
+            var result = _userService.GetByEmail(email);
+
+            // Assert
+            result.ShouldBeNull();
+        }
     }
 }
