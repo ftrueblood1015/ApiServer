@@ -44,7 +44,7 @@ namespace ApiServer.Attributes
                 }
                 catch
                 {
-                    // token is invalid
+                    // invalid token
                     context.Result = new UnauthorizedResult();
                 }
             }
