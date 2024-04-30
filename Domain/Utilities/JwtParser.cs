@@ -34,5 +34,20 @@ namespace Domain.Utilities
                 return new List<string>() { data?.ToString()! };
             }
         }
+
+        public static bool IsValid(string jwt)
+        {
+            JwtSecurityToken jwtSecurityToken;
+            try
+            {
+                jwtSecurityToken = new JwtSecurityToken(jwt);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+
+            return jwtSecurityToken.ValidTo > DateTime.UtcNow;
+        }
     }
 }

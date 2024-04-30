@@ -35,6 +35,11 @@ namespace ApiServer.Attributes
                 {
                     var validationParameters = Constants.ValidationParameters[data[0]];
 
+                    if (!JwtParser.IsValid(data[1]))
+                    {
+                        context.Result = new UnauthorizedResult();
+                    }
+
                     var userRoles = JwtParser.GetValidatedUserRoles(data[1], validationParameters);
 
                     if (userRoles == null || !userRoles.Contains(_claim.Value))
