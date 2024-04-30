@@ -7,5 +7,7 @@
         public string? Environment { get; set; } = null;
 
         public Token Token { get; set; } = null!;
+
+        public string AuthPrefix { get; set; } = string.Empty;
     }
 }

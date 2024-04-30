@@ -10,6 +10,8 @@ namespace ApiServer
 
             var validationParams = options?.Token.CreateValidationParameters()!;
 
+            Constants.AddTokenValidation(options!.AuthPrefix, validationParams);
+
             authBuilder.AddJwtBearer(options =>
             {
                 options.RequireHttpsMetadata = false;
