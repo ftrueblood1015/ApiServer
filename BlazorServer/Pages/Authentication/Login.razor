@@ -1,0 +1,27 @@
+﻿@page "/login"
+@layout PreAuthenticatedLayout
+
+<MudText @attributes='Splats.PageHeader("LoginPage")' Class="mt-5 mb-5">Login Page</MudText>
+
+<MudForm @ref="Form" @bind-IsValid="@success">
+    <MudPaper Class="pa-4">
+        <MudGrid>
+            <MudItem xs="12" md="12" lg="12">
+                <MudTextField @bind-Value="UserLogin!.Username" @attributes="@Splats.TextRequired(nameof(UserLogin.Username))" For="@(() => UserLogin!.Username)" />
+            </MudItem>
+            <MudItem xs="12" md="12" lg="12">
+                <MudTextField @bind-Value="UserLogin!.Password" @attributes="@Splats.PasswordRequired(nameof(UserLogin.Password))" For="@(() => UserLogin!.Password)" 
+                    InputType="@PasswordInput" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ShowPassword" AdornmentAriaLabel="Show Password" />
+            </MudItem>
+            @if(!successfulLogin)
+            {
+                <MudItem xs="12" md="12" lg="12">
+                    <MudAlert Severity="Severity.Error">@AuthenticatedUser!.ApiMessage</MudAlert>
+                </MudItem>
+            }
+        </MudGrid>
+    </MudPaper>
+    <MudPaper Class="pa-4">
+        <MudButton @attributes='Splats.GenericButton(Color.Primary, Icons.Material.Filled.Login, "Login")' OnClick="@(() => LoginUser())">Login</MudButton>
+    </MudPaper>
+</MudForm>

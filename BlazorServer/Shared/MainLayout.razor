@@ -1,5 +1,8 @@
-﻿@inherits LayoutComponentBase
+﻿@using Domain.Models;
+@using BlazorServer.Services.Authentication;
+@inherits LayoutBase;
 @inject NavigationManager NavigationManager
+@inject IAuthenticationService AuthService
 
 <MudThemeProvider @bind-IsDarkMode="@_isDarkMode" Theme="_theme" />
 <MudDialogProvider />
@@ -11,29 +14,66 @@
         <MudText Typo="Typo.h5" Class="ml-3">PLACE HOLDER</MudText>
         <MudSpacer />
         <MudSwitch @bind-Checked="@_isDarkMode" Color="Color.Primary" Class="ma-4" T="bool" Label="Toggle Light/Dark Mode" />
+        <MudLink OnClick="Logout">Logout</MudLink>
     </MudAppBar>
     <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
         <NavMenu />
     </MudDrawer>
     <MudMainContent>
         <MudContainer MaxWidth="MaxWidth.ExtraLarge">
-            @Body
+                @Body
         </MudContainer>
     </MudMainContent>
 </MudLayout>
 
 @code {
+    [CascadingParameter] public Task<AuthenticationState> AuthenticationState { get; set; }
+
     bool _drawerOpen = true;
     private MudTheme _theme = new();
     private bool _isDarkMode = true;
 
     protected async override Task OnInitializedAsync()
     {
-        
+        base.OnInitialized();
+    }
+
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            await CheckAuthenticationState();
+        }
+    }
+
+    public async Task<bool> CheckAuthenticationState()
+    {
+        try
+        {
+            var authState = (AuthenticationState != null) ? await AuthenticationState : null;
+            if (authState == null || authState.User?.Identity?.IsAuthenticated != true)
+            {
+                throw new UnauthorizedAccessException("User is not authenticated.");
+            }
+
+            StateHasChanged();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            NavigationManager?.NavigateTo($"/login");
+            return false;
+        }
     }
 
     void DrawerToggle()
     {
         _drawerOpen = !_drawerOpen;
+    }
+
+    public async Task Logout()
+    {
+        await AuthService.Logout();
+        NavigationManager?.NavigateTo($"/login");
     }
 }

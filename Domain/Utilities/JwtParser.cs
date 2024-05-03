@@ -1,6 +1,7 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace Domain.Utilities
 {
@@ -48,6 +49,43 @@ namespace Domain.Utilities
             }
 
             return jwtSecurityToken.ValidTo > DateTime.UtcNow;
+        }
+
+        public static IEnumerable<Claim> ParseClaims(string jwt)
+        {
+            var claims = new List<Claim>();
+
+            try
+            {
+                var token = (JwtSecurityToken)new JwtSecurityTokenHandler().ReadToken(jwt);
+
+                List<string> userRoles = ExtractUserRoles(token);
+
+                claims = userRoles.Select(role => new Claim(ClaimTypes.Role, role)).ToList();
+
+                claims = AddExistingPayloadClaims(token, claims);
+            }
+            catch
+            {
+
+            }
+
+            return claims;
+        }
+
+        private static List<Claim> AddExistingPayloadClaims(JwtSecurityToken token, List<Claim> claims)
+        {
+            var payload = token.Payload;
+
+            payload.ToList().ForEach(kv =>
+            {
+                if (kv.Key.ToString() != "roles")
+                {
+                    claims.Add(new Claim(kv.Key.ToString(), kv.Value?.ToString()!));
+                }
+            });
+
+            return claims;
         }
     }
 }

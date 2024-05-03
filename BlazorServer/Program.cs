@@ -1,10 +1,15 @@
 using BlazorServer.Data;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
+using Blazored.LocalStorage;
 using MudBlazor;
 using MudBlazor.Services;
 using NetCore.AutoRegisterDi;
 using System.Reflection;
+using Domain.Models;
+using BlazorServer.Services;
+using Microsoft.AspNetCore.Components.Authorization;
+using BlazorServer.Services.Authentication;
+using Microsoft.AspNetCore.Identity;
+using Domain.Entities.Application;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +17,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
+
+var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+var config = new ConfigurationBuilder().AddJsonFile($"appsettings.{env}.json").AddEnvironmentVariables().Build();
 
 builder.Services.AddMudServices(config =>
 {
@@ -25,6 +33,20 @@ builder.Services.AddMudServices(config =>
     config.SnackbarConfiguration.ShowTransitionDuration = 500;
     config.SnackbarConfiguration.SnackbarVariant = Variant.Filled;
 });
+
+builder.Services.AddScoped<AuthenticationStateProvider, AuthStatHelper>();
+
+builder.Services.AddBlazoredLocalStorage();
+
+builder.Services.AddAuthorizationCore();
+
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(config.GetValue<string>("AppBaseUrl")!) });
+
+builder.Services.AddScoped(sp => new ApiServerClient(new HttpClient { BaseAddress = new Uri(config.GetValue<string>("ApiServerBaseUrl")!) }));
+
+builder.Services.AddScoped<AuthenticatedUser>();
+
+InjectPatternFromAssemblies(builder, "Service");
 
 var app = builder.Build();
 
@@ -42,7 +64,17 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
 app.Run();
+
+static void InjectPatternFromAssemblies(WebApplicationBuilder builder, string pattern, params Assembly[] assembly)
+{
+    builder.Services.RegisterAssemblyPublicNonGenericClasses(assembly)
+         .Where(c => c.Name.EndsWith(pattern, StringComparison.CurrentCultureIgnoreCase))
+         .AsPublicImplementedInterfaces();
+}

@@ -20,7 +20,7 @@ namespace ApiServer.Controllers.Authentication
 
         [AllowAnonymous]
         [HttpPost("Login")]
-        public ActionResult<AuthenticatedUser> Login([FromForm] UserLogin userLogin)
+        public ActionResult<AuthenticatedUser> Login(UserLogin userLogin)
         {
             var remoteIp = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.MapToIPv4().ToString()!;
 

@@ -1,0 +1,13 @@
+﻿@page "/users"
+
+@inherits PageBase
+@layout MainLayout
+
+<AuthorizeView Roles="SuperUser">
+    <Authorized>
+        <MudText>access</MudText>
+    </Authorized>
+    <NotAuthorized>
+        Denied
+    </NotAuthorized>
+</AuthorizeView>

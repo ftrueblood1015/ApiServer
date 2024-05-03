@@ -24,6 +24,7 @@ namespace Services.Authentication
 
         public AuthenticatedUser AuthenticateUser(UserLogin userLogin, string remoteIp)
         {
+            var test = userLogin;
             if (userLogin == null)
             {
                 return new AuthenticatedUser() { ApiMessage = "User Login Cannot Be Null" };
